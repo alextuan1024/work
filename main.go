@@ -8,23 +8,23 @@ import (
 )
 
 func main() {
-	p := work.New(2)
+	pool := work.New(5)
 	var wg sync.WaitGroup
 	wg.Add(100 * len(names))
 
 	for i := 0; i < 100; i++ {
 		for _, name := range names {
-			np := namePrinter{
+			p := printer{
 				name: name,
 			}
 			go func() {
-				p.Run(&np)
+				pool.Run(&p)
 				wg.Done()
 			}()
 		}
 	}
 	wg.Wait()
-	p.Shutdown()
+	pool.Shutdown()
 }
 
 var names = []string{
@@ -39,11 +39,11 @@ var names = []string{
 	"hill",
 }
 
-type namePrinter struct {
+type printer struct {
 	name string
 }
 
-func (m *namePrinter) Task() {
+func (m *printer) Do() {
 	log.Println(m.name)
 	time.Sleep(time.Second)
 }

@@ -3,7 +3,7 @@ package work
 import "sync"
 
 type Worker interface {
-	Task()
+	Do()
 }
 
 type Pool struct {
@@ -12,19 +12,19 @@ type Pool struct {
 }
 
 func New(maxGoroutines int) *Pool {
-	p := Pool{
+	pool := Pool{
 		work: make(chan Worker),
 	}
-	p.wg.Add(maxGoroutines)
+	pool.wg.Add(maxGoroutines)
 	for i := 0; i < maxGoroutines; i++ {
 		go func() {
-			for w := range p.work {
-				w.Task()
+			for w := range pool.work {
+				w.Do()
 			}
-			p.wg.Done()
+			pool.wg.Done()
 		}()
 	}
-	return &p
+	return &pool
 }
 
 func (p *Pool) Run(w Worker) {
